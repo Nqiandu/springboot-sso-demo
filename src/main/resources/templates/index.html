@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta charset="UTF-8">
+    <title>Index</title>
+    <script type="text/javascript" src="static/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="static/jquery.cookie.js"></script>
+    <script type="text/javascript">
+        $(function(){
+            // 1.获取当前页面的地址
+            var currentPageUrl = window.location.href;
+            // 2.把当前地址作为参数传递到登录页面
+            $("#turn_login_page").prop("href", "http://127.0.0.1:8082/turnLoginPage?currentPage="+currentPageUrl);
+            // 3.获取用户存在本地硬盘的cookie值
+            var cookieValue = $.cookie("COOKIE_KEY");
+            // 4.判断是否取到cookie的值，如果cookie取不到则说明用户没有登录需要让用户执行登录操作，如果获取到了cookie，需要去redis中进行验证
+            if(!cookieValue) {
+                return;
+            }
+            // 5.通过ajax远程访问sso项目进行判断该用户是否处于登录状态
+            $.ajax({
+                url : "http://127.0.0.1:8082/token/"+cookieValue,
+                type : "get",
+                dataType : "jsonp",
+                success : function(data){
+                    // 跨域
+                    $("#login_div").empty();
+                    var user = JSON.parse(data);
+                    $("#login_div").append("<h1>Welcome:"+user.username+"</h1>")
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>Index Page</h1>
+    <div id="login_div">
+        <a href="" id="turn_login_page">登录</a>
+    </div>
+    <a href="/buyIphone">购买手机</a>
+</body>
+</html>
